@@ -1,25 +1,17 @@
 name: Continuous Integration
-on: [pull_request, workflow_dispatch]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 jobs:
   build:
     strategy:
       fail-fast: true
       matrix:
         zig-version: [0.14.1]
-        include:
-          # macOS builds
-          - os: macos-latest
-            arch: aarch64
-          - os: macos-latest
-            arch: x86_64
-          # Linux builds
-          - os: ubuntu-latest
-            arch: aarch64
-          - os: ubuntu-latest
-            arch: x86_64
-          # Windows builds
-          - os: windows-latest
-            arch: x86_64
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{matrix.os}}
     steps:
       - name: Checkout
