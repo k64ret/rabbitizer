@@ -1,6 +1,6 @@
 # Rabbitizer
 
-[![build](https://github.com/k64ret/rabbitizer/actions/workflows/ci.yaml/badge.svg)](https://github.com/k64ret/rabbitizer/actions/workflows/ci.yaml)
+[![CI](https://github.com/k64ret/rabbitizer/actions/workflows/ci.yaml/badge.svg)](https://github.com/k64ret/rabbitizer/actions/workflows/ci.yaml)
 
 _[rabbitizer](https://github.com/Decompollaborate/rabbitizer) ported to the Zig
 build system_
