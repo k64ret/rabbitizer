@@ -5,33 +5,28 @@ build system_
 
 ## Consuming
 
-Since [rabbitizer](https://github.com/k64ret/rabbitizer) doesn't have tags or
-releases yet, it makes the most sense to pull the latest commit from `main` like
-so.
+Since this repo doesn't currently have tags or releases, it makes the most sense
+to pull the latest commit from `main`.
 
 ```sh
 zig fetch --save git+https://github.com/k64ret/rabbitizer?ref=main
 ```
 
-You can then consume rabbitizer as a static or dynamic library in your
+Then, you can consume rabbitizer as a static or dynamic library in your
 `build.zig`.
 
 ```zig
-// Static library
 const rabbitizer_dep = b.dependency("rabbitizer", .{
     .target = target,
     .optimize = optimize,
-    .linkage = .static
+    // These are the defaults if not provided...
+    .linkage = .static, // or `.dynamic`
+    .experimental = false,
+    .sanity_checks = true,
 });
-// Dynamic library
-const rabbitizer_dep = b.dependency("rabbitizer", .{
-    .target = target,
-    .optimize = optimize,
-    .linkage = .dynamic
-});
-// C library artifact
+// C artifact
 const rabbitizer_artifact = rabbitizer_dep.artifact("rabbitizer");
-// or, C++ library artifact
+// or, C++ artifact
 const rabbitizer_artifact = rabbitizer_dep.artifact("rabbitizerpp");
 // Then link against it
 some_lib_or_exe.linkLibrary(rabbitizer_artifact);
