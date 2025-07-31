@@ -17,10 +17,8 @@ pub fn build(b: *std.Build) void {
     _ = asan;
 
     const experimental = b.option(bool, "experimental", "(default: false)") orelse false;
-    _ = experimental;
 
     const sanity_checks = b.option(bool, "sanity-checks", "(default: true)") orelse true;
-    _ = sanity_checks;
 
     const rabbitizer_dep = b.dependency("upstream", .{});
 
@@ -34,14 +32,31 @@ pub fn build(b: *std.Build) void {
         b.createModule(.{
             .target = target,
             .optimize = optimize,
+            .pic = true,
             .link_libc = true,
         }),
         b.createModule(.{
             .target = target,
             .optimize = optimize,
+            .pic = true,
             .link_libcpp = true,
         }),
     };
+
+    if (optimize == .Debug) {
+        mod.addCMacro("DEVELOPMENT", "1");
+        mod_xx.addCMacro("DEVELOPMENT", "1");
+    }
+
+    if (experimental) {
+        mod.addCMacro("EXPERIMENTAL", "");
+        mod_xx.addCMacro("EXPERIMENTAL", "");
+    }
+
+    if (sanity_checks) {
+        mod.addCMacro("RAB_SANITY_CHECKS", "1");
+        mod_xx.addCMacro("RAB_SANITY_CHECKS", "1");
+    }
 
     const lib, const lib_xx = .{
         b.addLibrary(.{
@@ -148,7 +163,6 @@ const c_src = [_][]const u8{
 
 const c_flags = [_][]const u8{
     "-std=c11",
-    "-fPIC",
     "-fno-common",
 };
 
@@ -173,7 +187,6 @@ const cpp_src = [_][]const u8{
 
 const cpp_flags = [_][]const u8{
     "-std=c++17",
-    "-fPIC",
     "-fno-common",
 };
 
