@@ -10,6 +10,18 @@ pub fn build(b: *std.Build) void {
         "Whether to compile as a static or dynamic library (default: static)",
     ) orelse .static;
 
+    const werror = b.option(bool, "werror", "(default: false)") orelse false;
+    _ = werror;
+
+    const asan = b.option(bool, "asan", "(default: false)") orelse false;
+    _ = asan;
+
+    const experimental = b.option(bool, "experimental", "(default: false)") orelse false;
+    _ = experimental;
+
+    const sanity_checks = b.option(bool, "sanity-checks", "(default: true)") orelse true;
+    _ = sanity_checks;
+
     const rabbitizer_dep = b.dependency("upstream", .{});
 
     const src_root = rabbitizer_dep.path(".");
