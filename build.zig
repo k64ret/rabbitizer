@@ -9,16 +9,26 @@ pub fn build(b: *std.Build) void {
         "linkage",
         "Whether to compile as a static or dynamic library (default: static)",
     ) orelse .static;
-
-    const werror = b.option(bool, "werror", "(default: false)") orelse false;
-    _ = werror;
-
-    const asan = b.option(bool, "asan", "(default: false)") orelse false;
-    _ = asan;
-
-    const experimental = b.option(bool, "experimental", "(default: false)") orelse false;
-
-    const sanity_checks = b.option(bool, "sanity-checks", "(default: true)") orelse true;
+    const werror = b.option(
+        bool,
+        "werror",
+        "Treat warnings as errors (default: false)",
+    ) orelse false;
+    const asan = b.option(
+        bool,
+        "asan",
+        "Enable address and undefined behavior sanitizers (default: false)",
+    ) orelse false;
+    const experimental = b.option(
+        bool,
+        "experimental",
+        "Enable experimental code paths (default: false)",
+    ) orelse false;
+    const sanity_checks = b.option(
+        bool,
+        "sanity-checks",
+        "Enable sanity checks (default: true)",
+    ) orelse true;
 
     const rabbitizer_dep = b.dependency("upstream", .{});
 
@@ -27,6 +37,8 @@ pub fn build(b: *std.Build) void {
     const tables_path = rabbitizer_dep.path("tables");
     const include_path = rabbitizer_dep.path("include");
     const cpp_include_path = rabbitizer_dep.path("cplusplus/include");
+
+    var extra_flags: std.BoundedArray([]const u8, 6) = .{};
 
     const mod, const mod_xx = .{
         b.createModule(.{
@@ -43,9 +55,25 @@ pub fn build(b: *std.Build) void {
         }),
     };
 
-    if (optimize == .Debug) {
+    if (optimize != .Debug) {
+        extra_flags.appendAssumeCapacity("-g");
+    } else {
+        extra_flags.appendAssumeCapacity("-g3");
         mod.addCMacro("DEVELOPMENT", "1");
         mod_xx.addCMacro("DEVELOPMENT", "1");
+    }
+
+    if (werror) {
+        extra_flags.appendAssumeCapacity("-Werror");
+    }
+
+    if (asan) {
+        extra_flags.appendSliceAssumeCapacity(&.{
+            "-fsanitize=address",
+            "-fsanitize=pointer-compare",
+            "-fsanitize=pointer-subtract",
+            "-fsanitize=undefined",
+        });
     }
 
     if (experimental) {
@@ -77,7 +105,7 @@ pub fn build(b: *std.Build) void {
     lib.addCSourceFiles(.{
         .root = src_root,
         .files = &c_src,
-        .flags = &warnings ++ c_warnings ++ c_flags,
+        .flags = &(warnings ++ c_warnings ++ c_flags ++ extra_flags.buffer),
     });
 
     lib.installHeadersDirectory(include_path, "", .{});
@@ -91,12 +119,12 @@ pub fn build(b: *std.Build) void {
     lib_xx.addCSourceFiles(.{
         .root = src_root,
         .files = &c_src,
-        .flags = &warnings ++ c_warnings ++ c_flags,
+        .flags = &(warnings ++ c_warnings ++ c_flags ++ extra_flags.buffer),
     });
     lib_xx.addCSourceFiles(.{
         .root = src_root_xx,
         .files = &cpp_src,
-        .flags = &warnings ++ cpp_warnings ++ cpp_flags,
+        .flags = &(warnings ++ cpp_warnings ++ cpp_flags ++ extra_flags.buffer),
     });
 
     lib_xx.installHeadersDirectory(include_path, "", .{});
