@@ -1,4 +1,4 @@
-# Rabbitizer
+# rabbitizer
 
 [![CI](https://github.com/k64ret/rabbitizer/actions/workflows/ci.yaml/badge.svg)](https://github.com/k64ret/rabbitizer/actions/workflows/ci.yaml)
 
