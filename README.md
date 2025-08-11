@@ -7,11 +7,8 @@ build system_
 
 ## Consuming
 
-Since this repo doesn't currently have tags or releases, it makes the most sense
-to pull the latest commit from `main`.
-
 ```sh
-zig fetch --save git+https://github.com/k64ret/rabbitizer?ref=main
+zig fetch --save https://github.com/k64ret/rabbitizer/archive/refs/tags/1.3.0.tar.gz
 ```
 
 Then, you can consume rabbitizer as a static or dynamic library in your
@@ -28,11 +25,13 @@ const rabbitizer_dep = b.dependency("rabbitizer", .{
     .experimental = false,
     .sanity_checks = true,
 });
+
 // C artifact
 const rabbitizer_artifact = rabbitizer_dep.artifact("rabbitizer");
 // or, C++ artifact
 const rabbitizer_artifact = rabbitizer_dep.artifact("rabbitizerpp");
-// Then link against it
+
+some_lib_or_exe.addIncludePath(rabbitizer_artifact.getEmittedIncludeTree());
 some_lib_or_exe.linkLibrary(rabbitizer_artifact);
 ```
 
