@@ -36,9 +36,9 @@ pub fn build(b: *std.Build) void {
     const src_root_xx = rabbitizer_dep.path("cplusplus");
     const tables_path = rabbitizer_dep.path("tables");
     const include_path = rabbitizer_dep.path("include");
-    const cpp_include_path = rabbitizer_dep.path("cplusplus/include");
+    const include_path_xx = rabbitizer_dep.path("cplusplus/include");
 
-    var extra_flags: std.BoundedArray([]const u8, 6) = .{};
+    var extra_flags: std.BoundedArray([]const u8, 8) = .{};
 
     const mod, const mod_xx = .{
         b.createModule(.{
@@ -56,9 +56,9 @@ pub fn build(b: *std.Build) void {
     };
 
     if (optimize != .Debug) {
-        extra_flags.appendAssumeCapacity("-g");
+        extra_flags.appendSliceAssumeCapacity(&.{ "-Os", "-g" });
     } else {
-        extra_flags.appendAssumeCapacity("-g3");
+        extra_flags.appendSliceAssumeCapacity(&.{ "-O0", "-g3" });
         mod.addCMacro("DEVELOPMENT", "1");
         mod_xx.addCMacro("DEVELOPMENT", "1");
     }
@@ -101,6 +101,7 @@ pub fn build(b: *std.Build) void {
 
     lib.addIncludePath(tables_path);
     lib.addIncludePath(include_path);
+    lib.addIncludePath(include_path.path(b, "common"));
 
     lib.addCSourceFiles(.{
         .root = src_root,
@@ -108,13 +109,18 @@ pub fn build(b: *std.Build) void {
         .flags = &(warnings ++ c_warnings ++ c_flags ++ extra_flags.buffer),
     });
 
-    lib.installHeadersDirectory(include_path, "", .{});
+    lib.installHeadersDirectory(
+        include_path,
+        "",
+        .{ .include_extensions = &.{ ".h", ".inc" } },
+    );
 
     b.installArtifact(lib);
 
     lib_xx.addIncludePath(tables_path);
     lib_xx.addIncludePath(include_path);
-    lib_xx.addIncludePath(cpp_include_path);
+    lib_xx.addIncludePath(include_path.path(b, "common"));
+    lib_xx.addIncludePath(include_path_xx);
 
     lib_xx.addCSourceFiles(.{
         .root = src_root,
@@ -127,11 +133,15 @@ pub fn build(b: *std.Build) void {
         .flags = &(warnings ++ cpp_warnings ++ cpp_flags ++ extra_flags.buffer),
     });
 
-    lib_xx.installHeadersDirectory(include_path, "", .{});
     lib_xx.installHeadersDirectory(
-        cpp_include_path,
+        include_path,
         "",
-        .{ .include_extensions = &.{".hpp"} },
+        .{ .include_extensions = &.{ ".h", ".inc" } },
+    );
+    lib_xx.installHeadersDirectory(
+        include_path_xx,
+        "",
+        .{ .include_extensions = &.{ ".hpp", ".inc" } },
     );
 
     b.installArtifact(lib_xx);
@@ -155,7 +165,6 @@ const warnings = [_][]const u8{
 };
 
 const c_src = [_][]const u8{
-    "src/analysis/RabbitizerJrRegData.c",
     "src/analysis/RabbitizerLoPairingInfo.c",
     "src/analysis/RabbitizerRegistersTracker.c",
     "src/analysis/RabbitizerTrackedRegisterState.c",
@@ -165,28 +174,19 @@ const c_src = [_][]const u8{
     "src/instructions/RabbitizerInstrCategory.c",
     "src/instructions/RabbitizerInstrDescriptor.c",
     "src/instructions/RabbitizerInstrId.c",
-    "src/instructions/RabbitizerInstrIdType.c",
     "src/instructions/RabbitizerInstrSuffix.c",
-    "src/instructions/RabbitizerInstruction/RabbitizerInstruction.c",
-    "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Disassemble.c",
-    "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Examination.c",
-    "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Operand.c",
-    "src/instructions/RabbitizerInstruction/RabbitizerInstruction_ProcessUniqueId.c",
-    "src/instructions/RabbitizerInstructionCpu/RabbitizerInstructionCpu_OperandType.c",
-    "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE.c",
-    "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE_OperandType.c",
-    "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE_ProcessUniqueId.c",
-    "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex.c",
-    "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex_OperandType.c",
-    "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex_ProcessUniqueId.c",
-    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900.c",
-    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_OperandType.c",
-    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_ProcessUniqueId.c",
+    "src/instructions/RabbitizerRegister.c",
     "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp.c",
     "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_OperandType.c",
     "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_ProcessUniqueId.c",
-    "src/instructions/RabbitizerRegister.c",
-    "src/instructions/RabbitizerRegisterDescriptor.c",
+    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900.c",
+    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_OperandType.c",
+    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_ProcessUniqueId.c",
+    "src/instructions/RabbitizerInstructionCpu/RabbitizerInstructionCpu_OperandType.c",
+    "src/instructions/RabbitizerInstruction/RabbitizerInstruction.c",
+    "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Disassemble.c",
+    "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Examination.c",
+    "src/instructions/RabbitizerInstruction/RabbitizerInstruction_ProcessUniqueId.c",
 };
 
 const c_flags = [_][]const u8{
@@ -200,15 +200,11 @@ const c_warnings = [_][]const u8{
 };
 
 const cpp_src = [_][]const u8{
-    "src/analysis/JrRegData.cpp",
     "src/analysis/LoPairingInfo.cpp",
     "src/analysis/RegistersTracker.cpp",
     "src/instructions/InstrId.cpp",
-    "src/instructions/InstrIdType.cpp",
     "src/instructions/InstructionBase.cpp",
     "src/instructions/InstructionCpu.cpp",
-    "src/instructions/InstructionR3000GTE.cpp",
-    "src/instructions/InstructionR4000Allegrex.cpp",
     "src/instructions/InstructionR5900.cpp",
     "src/instructions/InstructionRsp.cpp",
 };

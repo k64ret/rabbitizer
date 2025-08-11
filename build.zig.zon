@@ -1,11 +1,11 @@
 .{
     .name = .rabbitizer,
-    .version = "1.13.0",
+    .version = "1.3.0",
     .fingerprint = 0x4ea9905eab1bf0f4, // Changing this has security and trust implications.
     .dependencies = .{
         .upstream = .{
-            .url = "https://github.com/Decompollaborate/rabbitizer/archive/refs/tags/1.13.0.tar.gz",
-            .hash = "N-V-__8AAJ-OOADVPxODY_GpElEu-b9sPM5p40tD4j4M8TDC",
+            .url = "https://github.com/Decompollaborate/rabbitizer/archive/refs/tags/1.3.0.tar.gz",
+            .hash = "N-V-__8AAF6JCAC8FDUq6g-i9nS5kwDztfmC1YW9ESyBnwTE",
         },
     },
     .paths = .{
