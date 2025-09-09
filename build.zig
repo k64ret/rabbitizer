@@ -38,7 +38,15 @@ pub fn build(b: *std.Build) void {
     const include_path = rabbitizer_dep.path("include");
     const include_path_xx = rabbitizer_dep.path("cplusplus/include");
 
-    var extra_flags: std.BoundedArray([]const u8, 8) = .{};
+    var buf: [25][]const u8 = undefined;
+    var flags: std.ArrayList([]const u8) = .initBuffer(&buf);
+
+    flags.appendSliceAssumeCapacity(&(warnings ++ c_warnings ++ c_flags));
+
+    var buf_xx: [24][]const u8 = undefined;
+    var flags_xx: std.ArrayList([]const u8) = .initBuffer(&buf_xx);
+
+    flags_xx.appendSliceAssumeCapacity(&(warnings ++ cpp_warnings ++ cpp_flags));
 
     const mod, const mod_xx = .{
         b.createModule(.{
@@ -56,19 +64,28 @@ pub fn build(b: *std.Build) void {
     };
 
     if (optimize != .Debug) {
-        extra_flags.appendSliceAssumeCapacity(&.{ "-Os", "-g" });
+        flags.appendSliceAssumeCapacity(&.{ "-Os", "-g" });
+        flags_xx.appendSliceAssumeCapacity(&.{ "-Os", "-g" });
     } else {
-        extra_flags.appendSliceAssumeCapacity(&.{ "-O0", "-g3" });
+        flags.appendSliceAssumeCapacity(&.{ "-O0", "-g3" });
+        flags_xx.appendSliceAssumeCapacity(&.{ "-O0", "-g3" });
         mod.addCMacro("DEVELOPMENT", "1");
         mod_xx.addCMacro("DEVELOPMENT", "1");
     }
 
     if (werror) {
-        extra_flags.appendAssumeCapacity("-Werror");
+        flags.appendAssumeCapacity("-Werror");
+        flags_xx.appendAssumeCapacity("-Werror");
     }
 
     if (asan) {
-        extra_flags.appendSliceAssumeCapacity(&.{
+        flags.appendSliceAssumeCapacity(&.{
+            "-fsanitize=address",
+            "-fsanitize=pointer-compare",
+            "-fsanitize=pointer-subtract",
+            "-fsanitize=undefined",
+        });
+        flags_xx.appendSliceAssumeCapacity(&.{
             "-fsanitize=address",
             "-fsanitize=pointer-compare",
             "-fsanitize=pointer-subtract",
@@ -106,7 +123,7 @@ pub fn build(b: *std.Build) void {
     lib.addCSourceFiles(.{
         .root = src_root,
         .files = &c_src,
-        .flags = &(warnings ++ c_warnings ++ c_flags ++ extra_flags.buffer),
+        .flags = flags.items,
     });
 
     lib.installHeadersDirectory(
@@ -125,12 +142,12 @@ pub fn build(b: *std.Build) void {
     lib_xx.addCSourceFiles(.{
         .root = src_root,
         .files = &c_src,
-        .flags = &(warnings ++ c_warnings ++ c_flags ++ extra_flags.buffer),
+        .flags = flags.items,
     });
     lib_xx.addCSourceFiles(.{
         .root = src_root_xx,
         .files = &cpp_src,
-        .flags = &(warnings ++ cpp_warnings ++ cpp_flags ++ extra_flags.buffer),
+        .flags = flags_xx.items,
     });
 
     lib_xx.installHeadersDirectory(
