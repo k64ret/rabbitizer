@@ -2,7 +2,9 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
+    const optimize = b.standardOptimizeOption(.{
+        .preferred_optimize_mode = .ReleaseSmall,
+    });
 
     const linkage = b.option(
         std.builtin.LinkMode,
@@ -41,12 +43,12 @@ pub fn build(b: *std.Build) void {
     var buf: [25][]const u8 = undefined;
     var flags: std.ArrayList([]const u8) = .initBuffer(&buf);
 
-    flags.appendSliceAssumeCapacity(&(warnings ++ c_warnings ++ c_flags));
+    flags.appendSliceAssumeCapacity(warnings ++ c_warnings ++ c_flags);
 
     var buf_xx: [24][]const u8 = undefined;
     var flags_xx: std.ArrayList([]const u8) = .initBuffer(&buf_xx);
 
-    flags_xx.appendSliceAssumeCapacity(&(warnings ++ cpp_warnings ++ cpp_flags));
+    flags_xx.appendSliceAssumeCapacity(warnings ++ cpp_warnings ++ cpp_flags);
 
     const mod, const mod_xx = .{
         b.createModule(.{
@@ -116,13 +118,13 @@ pub fn build(b: *std.Build) void {
         }),
     };
 
-    lib.addIncludePath(tables_path);
-    lib.addIncludePath(include_path);
-    lib.addIncludePath(include_path.path(b, "common"));
+    lib.root_module.addIncludePath(tables_path);
+    lib.root_module.addIncludePath(include_path);
+    lib.root_module.addIncludePath(include_path.path(b, "common"));
 
-    lib.addCSourceFiles(.{
+    lib.root_module.addCSourceFiles(.{
         .root = src_root,
-        .files = &c_src,
+        .files = c_src,
         .flags = flags.items,
     });
 
@@ -134,19 +136,19 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(lib);
 
-    lib_xx.addIncludePath(tables_path);
-    lib_xx.addIncludePath(include_path);
-    lib_xx.addIncludePath(include_path.path(b, "common"));
-    lib_xx.addIncludePath(include_path_xx);
+    lib_xx.root_module.addIncludePath(tables_path);
+    lib_xx.root_module.addIncludePath(include_path);
+    lib_xx.root_module.addIncludePath(include_path.path(b, "common"));
+    lib_xx.root_module.addIncludePath(include_path_xx);
 
-    lib_xx.addCSourceFiles(.{
+    lib_xx.root_module.addCSourceFiles(.{
         .root = src_root,
-        .files = &c_src,
+        .files = c_src,
         .flags = flags.items,
     });
-    lib_xx.addCSourceFiles(.{
+    lib_xx.root_module.addCSourceFiles(.{
         .root = src_root_xx,
-        .files = &cpp_src,
+        .files = cpp_src,
         .flags = flags_xx.items,
     });
 
@@ -164,7 +166,7 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(lib_xx);
 }
 
-const warnings = [_][]const u8{
+const warnings: []const []const u8 = &.{
     "-Wall",
     "-Wextra",
     "-Wpedantic",
@@ -181,7 +183,8 @@ const warnings = [_][]const u8{
     "-Werror=type-limits",
 };
 
-const c_src = [_][]const u8{
+const c_src: []const []const u8 = &.{
+    "src/analysis/RabbitizerJrRegData.c",
     "src/analysis/RabbitizerLoPairingInfo.c",
     "src/analysis/RabbitizerRegistersTracker.c",
     "src/analysis/RabbitizerTrackedRegisterState.c",
@@ -191,46 +194,59 @@ const c_src = [_][]const u8{
     "src/instructions/RabbitizerInstrCategory.c",
     "src/instructions/RabbitizerInstrDescriptor.c",
     "src/instructions/RabbitizerInstrId.c",
+    "src/instructions/RabbitizerInstrIdType.c",
     "src/instructions/RabbitizerInstrSuffix.c",
-    "src/instructions/RabbitizerRegister.c",
-    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp.c",
-    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_OperandType.c",
-    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_ProcessUniqueId.c",
-    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900.c",
-    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_OperandType.c",
-    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_ProcessUniqueId.c",
-    "src/instructions/RabbitizerInstructionCpu/RabbitizerInstructionCpu_OperandType.c",
     "src/instructions/RabbitizerInstruction/RabbitizerInstruction.c",
     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Disassemble.c",
     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Examination.c",
+    "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Operand.c",
     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_ProcessUniqueId.c",
+    "src/instructions/RabbitizerInstructionCpu/RabbitizerInstructionCpu_OperandType.c",
+    "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE.c",
+    "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE_OperandType.c",
+    "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE_ProcessUniqueId.c",
+    "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex.c",
+    "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex_OperandType.c",
+    "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex_ProcessUniqueId.c",
+    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900.c",
+    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_OperandType.c",
+    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_ProcessUniqueId.c",
+    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp.c",
+    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_OperandType.c",
+    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_ProcessUniqueId.c",
+    "src/instructions/RabbitizerRegister.c",
+    "src/instructions/RabbitizerRegisterDescriptor.c",
 };
 
-const c_flags = [_][]const u8{
+const c_flags: []const []const u8 = &.{
     "-std=c11",
     "-fno-common",
 };
 
-const c_warnings = [_][]const u8{
+const c_warnings: []const []const u8 = &.{
     "-Werror=implicit-function-declaration",
     "-Werror=incompatible-pointer-types",
 };
 
-const cpp_src = [_][]const u8{
+const cpp_src: []const []const u8 = &.{
+    "src/analysis/JrRegData.cpp",
     "src/analysis/LoPairingInfo.cpp",
     "src/analysis/RegistersTracker.cpp",
     "src/instructions/InstrId.cpp",
+    "src/instructions/InstrIdType.cpp",
     "src/instructions/InstructionBase.cpp",
     "src/instructions/InstructionCpu.cpp",
+    "src/instructions/InstructionR3000GTE.cpp",
+    "src/instructions/InstructionR4000Allegrex.cpp",
     "src/instructions/InstructionR5900.cpp",
     "src/instructions/InstructionRsp.cpp",
 };
 
-const cpp_flags = [_][]const u8{
+const cpp_flags: []const []const u8 = &.{
     "-std=c++17",
     "-fno-common",
 };
 
-const cpp_warnings = [_][]const u8{
+const cpp_warnings: []const []const u8 = &.{
     "",
 };
