@@ -2,7 +2,9 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
+    const optimize = b.standardOptimizeOption(.{
+        .preferred_optimize_mode = .ReleaseSmall,
+    });
 
     const linkage = b.option(
         std.builtin.LinkMode,
@@ -181,42 +183,8 @@ const warnings: []const []const u8 = &.{
     "-Werror=type-limits",
 };
 
-// const c_src: []const []const u8 = &.{
-//     "src/analysis/RabbitizerJrRegData.c",
-//     "src/analysis/RabbitizerLoPairingInfo.c",
-//     "src/analysis/RabbitizerRegistersTracker.c",
-//     "src/analysis/RabbitizerTrackedRegisterState.c",
-//     "src/common/RabbitizerConfig.c",
-//     "src/common/RabbitizerVersion.c",
-//     "src/common/Utils.c",
-//     "src/instructions/RabbitizerInstrCategory.c",
-//     "src/instructions/RabbitizerInstrDescriptor.c",
-//     "src/instructions/RabbitizerInstrId.c",
-//     "src/instructions/RabbitizerInstrIdType.c",
-//     "src/instructions/RabbitizerInstrSuffix.c",
-//     "src/instructions/RabbitizerInstruction/RabbitizerInstruction.c",
-//     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Disassemble.c",
-//     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Examination.c",
-//     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Operand.c",
-//     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_ProcessUniqueId.c",
-//     "src/instructions/RabbitizerInstructionCpu/RabbitizerInstructionCpu_OperandType.c",
-//     "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE.c",
-//     "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE_OperandType.c",
-//     "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE_ProcessUniqueId.c",
-//     "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex.c",
-//     "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex_OperandType.c",
-//     "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex_ProcessUniqueId.c",
-//     "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900.c",
-//     "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_OperandType.c",
-//     "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_ProcessUniqueId.c",
-//     "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp.c",
-//     "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_OperandType.c",
-//     "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_ProcessUniqueId.c",
-//     "src/instructions/RabbitizerRegister.c",
-//     "src/instructions/RabbitizerRegisterDescriptor.c",
-// };
-
 const c_src: []const []const u8 = &.{
+    "src/analysis/RabbitizerJrRegData.c",
     "src/analysis/RabbitizerLoPairingInfo.c",
     "src/analysis/RabbitizerRegistersTracker.c",
     "src/analysis/RabbitizerTrackedRegisterState.c",
@@ -226,19 +194,28 @@ const c_src: []const []const u8 = &.{
     "src/instructions/RabbitizerInstrCategory.c",
     "src/instructions/RabbitizerInstrDescriptor.c",
     "src/instructions/RabbitizerInstrId.c",
+    "src/instructions/RabbitizerInstrIdType.c",
     "src/instructions/RabbitizerInstrSuffix.c",
-    "src/instructions/RabbitizerRegister.c",
-    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp.c",
-    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_OperandType.c",
-    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_ProcessUniqueId.c",
-    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900.c",
-    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_OperandType.c",
-    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_ProcessUniqueId.c",
-    "src/instructions/RabbitizerInstructionCpu/RabbitizerInstructionCpu_OperandType.c",
     "src/instructions/RabbitizerInstruction/RabbitizerInstruction.c",
     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Disassemble.c",
     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Examination.c",
+    "src/instructions/RabbitizerInstruction/RabbitizerInstruction_Operand.c",
     "src/instructions/RabbitizerInstruction/RabbitizerInstruction_ProcessUniqueId.c",
+    "src/instructions/RabbitizerInstructionCpu/RabbitizerInstructionCpu_OperandType.c",
+    "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE.c",
+    "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE_OperandType.c",
+    "src/instructions/RabbitizerInstructionR3000GTE/RabbitizerInstructionR3000GTE_ProcessUniqueId.c",
+    "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex.c",
+    "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex_OperandType.c",
+    "src/instructions/RabbitizerInstructionR4000Allegrex/RabbitizerInstructionR4000Allegrex_ProcessUniqueId.c",
+    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900.c",
+    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_OperandType.c",
+    "src/instructions/RabbitizerInstructionR5900/RabbitizerInstructionR5900_ProcessUniqueId.c",
+    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp.c",
+    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_OperandType.c",
+    "src/instructions/RabbitizerInstructionRsp/RabbitizerInstructionRsp_ProcessUniqueId.c",
+    "src/instructions/RabbitizerRegister.c",
+    "src/instructions/RabbitizerRegisterDescriptor.c",
 };
 
 const c_flags: []const []const u8 = &.{
@@ -251,26 +228,16 @@ const c_warnings: []const []const u8 = &.{
     "-Werror=incompatible-pointer-types",
 };
 
-// const cpp_src: []const []const u8 = &.{
-//     "src/analysis/JrRegData.cpp",
-//     "src/analysis/LoPairingInfo.cpp",
-//     "src/analysis/RegistersTracker.cpp",
-//     "src/instructions/InstrId.cpp",
-//     "src/instructions/InstrIdType.cpp",
-//     "src/instructions/InstructionBase.cpp",
-//     "src/instructions/InstructionCpu.cpp",
-//     "src/instructions/InstructionR3000GTE.cpp",
-//     "src/instructions/InstructionR4000Allegrex.cpp",
-//     "src/instructions/InstructionR5900.cpp",
-//     "src/instructions/InstructionRsp.cpp",
-// };
-
 const cpp_src: []const []const u8 = &.{
+    "src/analysis/JrRegData.cpp",
     "src/analysis/LoPairingInfo.cpp",
     "src/analysis/RegistersTracker.cpp",
     "src/instructions/InstrId.cpp",
+    "src/instructions/InstrIdType.cpp",
     "src/instructions/InstructionBase.cpp",
     "src/instructions/InstructionCpu.cpp",
+    "src/instructions/InstructionR3000GTE.cpp",
+    "src/instructions/InstructionR4000Allegrex.cpp",
     "src/instructions/InstructionR5900.cpp",
     "src/instructions/InstructionRsp.cpp",
 };
