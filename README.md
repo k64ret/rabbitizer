@@ -31,8 +31,8 @@ const rabbitizer_artifact = rabbitizer_dep.artifact("rabbitizer");
 // or, C++ artifact
 const rabbitizer_artifact = rabbitizer_dep.artifact("rabbitizerpp");
 
-some_lib_or_exe.addIncludePath(rabbitizer_artifact.getEmittedIncludeTree());
-some_lib_or_exe.linkLibrary(rabbitizer_artifact);
+some_lib_or_exe.root_module.addIncludePath(rabbitizer_artifact.getEmittedIncludeTree());
+some_lib_or_exe.root_module.linkLibrary(rabbitizer_artifact);
 ```
 
 ## Building
