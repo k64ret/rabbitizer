@@ -8,7 +8,7 @@ build system_
 ## Consuming
 
 ```sh
-zig fetch --save https://github.com/k64ret/rabbitizer/archive/refs/tags/1.3.0.tar.gz
+zig fetch --save https://github.com/k64ret/rabbitizer/archive/refs/tags/1.16.0.tar.gz
 ```
 
 Then, you can consume rabbitizer as a static or dynamic library in your
@@ -31,8 +31,8 @@ const rabbitizer_artifact = rabbitizer_dep.artifact("rabbitizer");
 // or, C++ artifact
 const rabbitizer_artifact = rabbitizer_dep.artifact("rabbitizerpp");
 
-some_lib_or_exe.addIncludePath(rabbitizer_artifact.getEmittedIncludeTree());
-some_lib_or_exe.linkLibrary(rabbitizer_artifact);
+some_lib_or_exe.root_module.addIncludePath(rabbitizer_artifact.getEmittedIncludeTree());
+some_lib_or_exe.root_module.linkLibrary(rabbitizer_artifact);
 ```
 
 ## Building
