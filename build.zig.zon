@@ -1,6 +1,6 @@
 .{
     .name = .rabbitizer,
-    .version = "1.13.0",
+    .version = "1.16.0",
     .fingerprint = 0x4ea9905eab1bf0f4, // Changing this has security and trust implications.
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
